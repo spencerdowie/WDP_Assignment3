@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once("./db.php");
 //var_dump($_SESSION);
 $isLoggedIn = false;
 if (isset($_SESSION["id"]))
@@ -27,11 +28,12 @@ if (isset($_SESSION["id"]))
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarText">
-                <!-- <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="./add-game.php">Add Game</a></li>
+                    <!-- <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="./login.php">Login</a>
-                    </li>
-                </ul> -->
+                    </li> -->
+                </ul>
             </div>
         </div>
     </nav>
