@@ -21,7 +21,7 @@ function get_all_games(int $limit)
     $conn = create_connection();
     $games = [];
 
-    $sql = "SELECT `games`.`id`, `name`, `date_published`, `description` FROM `games` LIMIT ?";
+    $sql = "SELECT `id`, `name`, `date_published`, `description` FROM `games` LIMIT ?";
     if ($query = $conn->prepare($sql))
     {
         $query->bind_param("i", $limit);
@@ -91,10 +91,10 @@ function update_game_entry(int $gameID, string $name, string $desc, string $date
     $conn = create_connection();
     $success = false;
 
-    $sql = "UPDATE `games` SET `title` = ?, `body` = ?, `date` = ? WHERE `id` = ?";
+    $sql = "UPDATE `games` SET `name` = ?, `description` = ?, `date_published` = ? WHERE `id` = ?";
     if ($query = $conn->prepare($sql))
     {
-        $query->bind_param("sssi", $name, $desc, $date, $postID);
+        $query->bind_param("sssi", $name, $desc, $date, $gameID);
         if ($query->execute())
         {
             //echo $conn->insert_id;
@@ -110,4 +110,11 @@ function update_game_entry(int $gameID, string $name, string $desc, string $date
 
     $conn->close();
     return $success;
+}
+
+function get_reviews($gameID)
+{
+    $review = [];
+    $review["body"] = "Review Body Text";
+    return [$review];
 }

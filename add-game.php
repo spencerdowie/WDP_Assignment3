@@ -24,7 +24,7 @@ if (isset($_POST["submit"]))
     <label for="name">Name</label>
     <input type="text" id="name" name="name" />
     <label for="desc">Description</label>
-    <textarea name="desc" type="text" id="desc"></textarea>
+    <textarea name="desc" type="text" id="desc" style="height: 200px;"></textarea>
     <label for="date">Date Published</label>
     <input type="date" name="date" id="date" />
     <button type="submit" class="btn btn-primary">Create Game</button>

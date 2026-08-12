@@ -8,7 +8,7 @@ $games = get_all_games(10);
 <h2>All Games</h2>
 <ul>
     <?php foreach ($games as $game): ?>
-        <li><?php echo $game["name"] ?></li>
+        <li><a href=<?php echo "./game.php?id=" . $game["id"] ?>><?php echo $game["name"] ?></a></li>
     <?php endforeach; ?>
 </ul>
 <?php
