@@ -21,7 +21,7 @@ function get_all_games(int $limit)
     $conn = create_connection();
     $games = [];
 
-    $sql = "SELECT `games`.`id`, `title`, `date_published`, `description` FROM `blog_posts` LIMIT ?";
+    $sql = "SELECT `games`.`id`, `name`, `date_published`, `description` FROM `games` LIMIT ?";
     if ($query = $conn->prepare($sql))
     {
         $query->bind_param("i", $limit);
