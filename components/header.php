@@ -20,7 +20,7 @@ if (isset($_SESSION["id"]))
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 
-<body>
+<body class="vh-100 d-flex flex-column">
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
             <a class="navbar-brand" href="index.php">Home</a>
@@ -37,4 +37,4 @@ if (isset($_SESSION["id"]))
             </div>
         </div>
     </nav>
-    <div class="container mt-3">
+    <div class="container mt-3 flex-grow-1">
