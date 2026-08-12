@@ -37,4 +37,4 @@ if (isset($_SESSION["id"]))
             </div>
         </div>
     </nav>
-    <div class="container mt-3 flex-grow-1">
+    <div class="container mt-3 flex-grow-1 d-flex flex-column">

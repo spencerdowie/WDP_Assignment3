@@ -112,6 +112,32 @@ function update_game_entry(int $gameID, string $name, string $desc, string $date
     return $success;
 }
 
+function delete_game_entry(int $gameID)
+{
+    $conn = create_connection();
+    $success = false;
+
+    $sql = "DELETE FROM `games` WHERE `id` = ?";
+    if ($query = $conn->prepare($sql))
+    {
+        $query->bind_param("i", $gameID);
+        if ($query->execute())
+        {
+            //echo $conn->insert_id;
+            $_SESSION["deleteSuccess"] = true;
+            $success = true;
+        }
+    }
+    else
+    {
+        $_SESSION["deleteSuccess"] = false;
+        $success = false;
+    }
+
+    $conn->close();
+    return $success;
+}
+
 function get_reviews($gameID)
 {
     $review = [];
