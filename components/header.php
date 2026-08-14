@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once("./db.php");
 //var_dump($_SESSION);
 $isLoggedIn = false;
 if (isset($_SESSION["id"]))
@@ -19,7 +20,7 @@ if (isset($_SESSION["id"]))
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 
-<body>
+<body class="vh-100 d-flex flex-column">
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
             <a class="navbar-brand" href="index.php">Home</a>
@@ -27,12 +28,13 @@ if (isset($_SESSION["id"]))
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarText">
-                <!-- <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="./add-game.php">Add Game</a></li>
+                    <!-- <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="./login.php">Login</a>
-                    </li>
-                </ul> -->
+                    </li> -->
+                </ul>
             </div>
         </div>
     </nav>
-    <div class="container mt-3">
+    <div class="container mt-3 flex-grow-1 d-flex flex-column">
