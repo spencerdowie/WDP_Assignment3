@@ -52,46 +52,7 @@ function get_all_games(int $limit = 100) {
     return $games;
 }
 
-// Search and Category Filter Function
-function get_filtered_games(int $categoryId = 0, string $searchQuery = "") {
-    $conn = create_connection();
 
-    $sql = "SELECT games.*, categories.category_name 
-            FROM games 
-            JOIN categories ON games.category_id = categories.id 
-            WHERE 1=1";
-    
-    $params = [];
-    $types = "";
-
-    if ($categoryId > 0) {
-        $sql .= " AND games.category_id = ?";
-        $params[] = $categoryId;
-        $types .= "i";
-    }
-
-    if ($searchQuery !== "") {
-        $sql .= " AND games.name LIKE ?";
-        $params[] = "%" . $searchQuery . "%";
-        $types .= "s";
-    }
-
-    $sql .= " ORDER BY games.name ASC";
-
-    $stmt = $conn->prepare($sql);
-
-    if (count($params) > 0) {
-        $stmt->bind_param($types, ...$params);
-    }
-
-    $stmt->execute();
-    $games = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-
-    $stmt->close();
-    $conn->close();
-
-    return $games;
-}
 
 function get_game(int $gameID) {
     $conn = create_connection();

@@ -4,23 +4,9 @@ require_once("db.php");
 $pageTitle = "GA(IN)-ME";
 require_once("components/header.php");
 
-// select category
-$selectedCategory = 0;
-if (isset($_GET["category_id"])) {
-    $selectedCategory = (int)$_GET["category_id"];
-}
-
-// search input
-$searchQuery = "";
-if (isset($_GET["search"])) {
-    $rawSearch = $_GET["search"];
-    $searchQuery = trim($rawSearch);
-}
-
-//fetch categories
+// Fetch categories and all games directly
 $categories = get_all_categories();
-$games = get_filtered_games($selectedCategory, $searchQuery);
-
+$games = get_all_games(); // or get_filtered_games(0, "") depending on your db functions
 
 $myCollectionCount = 0;
 $myReviewCount = 0;
@@ -34,10 +20,9 @@ if ($isLoggedIn && !$isAdmin) {
 <!-- Hero Banner -->
 <div class="p-5 mb-4 text-white rounded shadow-sm" 
      style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('./public/images/hero.png') no-repeat center center; background-size: cover; min-height: 300px;">
-     <h1 class="display-5 fw-bold">Discover. Collect. Play.</h1>
+    <h1 class="display-5 fw-bold">Discover. Collect. Play.</h1>
     <p class="col-md-8 fs-5">Your personal board game library. Browse the shelf, save games to your collection, and share reviews with the community.</p>
-     
-    </div>
+</div>
 
 <!-- User Stats Card -->
 <?php if ($isLoggedIn && !$isAdmin): ?>
@@ -61,8 +46,6 @@ if ($isLoggedIn && !$isAdmin) {
     </div>
 <?php endif; ?>
 
-
-
 <!-- Header & Admin Button -->
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h3>Board Games</h3>
@@ -73,7 +56,7 @@ if ($isLoggedIn && !$isAdmin) {
 
 <!-- Games Grid -->
 <?php if (empty($games)): ?>
-    <p class="text-muted">No games found matching your search.</p>
+    <p class="text-muted">No games found.</p>
 <?php else: ?>
     <div class="row row-cols-1 row-cols-md-3 g-3 mb-4">
         <?php foreach ($games as $game): ?>
