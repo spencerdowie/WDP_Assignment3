@@ -1,50 +1,102 @@
 <?php
-//needs to separate from header include 
-//so we can set the page title _after_ getting the game name
-require_once("./db.php");
-
-
-$gameID = $_GET["id"];
-$game = null;
-
-if ((isset($gameID) && is_numeric($gameID)))
-{
-    $game = get_game($gameID);
+require_once("db.php");
+// Inline Auth Check
+if (!isset($_SESSION["id"]) || (int)$_SESSION["role_id"] !== 1) {
+    header("Location: index.php");
+    exit;
 }
 
-if ($game == null)
+$gameID = isset($_GET["id"]) ? (int) $_GET["id"] : (int) ($_POST["id"] ?? 0);
+$game = $gameID > 0 ? get_game($gameID) : null;
+if (!$game) {
     header("Location: index.php");
+    exit;
+}
 
-if (isset($_POST["submit"]))
-{
-    $name = $_POST["name"];
-    $desc = $_POST["desc"];
-    $date = $_POST["date"];
+$errors = [];
+$categories = get_all_categories();
 
-    if (isset($name) && isset($desc) && isset($date))
-    {
-        if (update_game_entry($gameID, $name, $desc, $date))
-        {
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $name = trim($_POST["name"] ?? "");
+    $desc = trim($_POST["desc"] ?? "");
+    $date = $_POST["date"] ?? "";
+    $categoryId = (int) ($_POST["category_id"] ?? 0);
+    $minPlayers = (int) ($_POST["min_players"] ?? 1);
+    $maxPlayers = (int) ($_POST["max_players"] ?? 1);
+    $minPlayTime = (int) ($_POST["min_play_time"] ?? 0);
+    $maxPlayTime = (int) ($_POST["max_play_time"] ?? 0);
+    $imageName = null;
+
+    if ($name === "") $errors[] = "Name is required.";
+    if (!empty($_FILES["image"]["name"])) {
+        $allowed = ["jpg", "jpeg", "png", "gif"];
+        $ext = strtolower(pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowed)) {
+            $errors[] = "Image must be a JPG, PNG, or GIF file.";
+        } else {
+            $imageName = uniqid("game_") . "." . $ext;
+            move_uploaded_file($_FILES["image"]["tmp_name"], __DIR__ . "/public/images/games/" . $imageName);
+        }
+    }
+
+    if (empty($errors)) {
+        if (update_game_entry($gameID, $name, $desc, $date, $categoryId, $minPlayers, $maxPlayers, $minPlayTime, $maxPlayTime, $imageName)) {
             header("Location: game.php?id=" . $gameID);
+            exit;
+        } else {
+            $errors[] = "Failed to update game.";
         }
     }
 }
-$pageTitle = "Edit " . $game["name"];
+
+$pageTitle = "Edit " . $game["name"] . " - GA(IN)-ME";
 require_once("components/header.php");
 ?>
 
-<h1>Edit <?php echo $game["name"] ?> Game Page</h1>
-<form method="post" action="#" class="d-flex flex-column w-50">
-    <input name="submit" hidden />
-    <label for="name">Name</label>
-    <input type="text" id="name" name="name" value="<?php echo strval($game["name"]) ?>" />
-    <label for="desc">Description</label>
-    <textarea name="desc" type="text" id="desc" style="height: 200px;"><?php echo $game["description"] ?></textarea>
-    <label for="date">Date Published</label>
-    <input type="date" name="date" id="date" value="<?php echo $game["date_published"] ?>" />
-    <button type="submit" class="btn btn-primary">Save Edit</button>
-</form>
+<div class="card mx-auto shadow-sm" style="max-width: 650px;">
+    <div class="card-header bg-dark text-white"><h1 class="h4 mb-0">Edit Game</h1></div>
+    <div class="card-body">
+        <?php if (!empty($errors)): ?>
+            <div class="alert alert-danger"><ul class="mb-0"><?php foreach ($errors as $e) echo "<li>" . htmlspecialchars($e) . "</li>"; ?></ul></div>
+        <?php endif; ?>
+        <form method="post" enctype="multipart/form-data">
+            <input type="hidden" name="id" value="<?php echo $game["id"]; ?>">
+            <div class="mb-3">
+                <label class="form-label">Name</label>
+                <input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($game["name"]); ?>" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Category</label>
+                <select name="category_id" class="form-select" required>
+                    <?php foreach ($categories as $cat): ?>
+                        <option value="<?php echo $cat["id"]; ?>" <?php echo $cat["id"] == $game["category_id"] ? "selected" : ""; ?>>
+                            <?php echo htmlspecialchars($cat["category_name"]); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col"><label class="form-label">Min Players</label><input type="number" name="min_players" class="form-control" value="<?php echo $game["min_players"]; ?>" required></div>
+                <div class="col"><label class="form-label">Max Players</label><input type="number" name="max_players" class="form-control" value="<?php echo $game["max_players"]; ?>" required></div>
+                <div class="col"><label class="form-label">Min Time</label><input type="number" name="min_play_time" class="form-control" value="<?php echo $game["min_play_time"]; ?>" required></div>
+                <div class="col"><label class="form-label">Max Time</label><input type="number" name="max_play_time" class="form-control" value="<?php echo $game["max_play_time"]; ?>" required></div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea name="desc" class="form-control" rows="4" required><?php echo htmlspecialchars($game["description"]); ?></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Date Published</label>
+                <input type="date" name="date" class="form-control" value="<?php echo htmlspecialchars($game["date_published"]); ?>" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Replace Image (Optional)</label>
+                <input type="file" name="image" class="form-control" accept="image/*">
+            </div>
+            <button type="submit" class="btn btn-warning fw-semibold">Save Changes</button>
+            <a href="game.php?id=<?php echo $game["id"]; ?>" class="btn btn-outline-secondary ms-2">Cancel</a>
+        </form>
+    </div>
+</div>
 
-<?php
-require_once("./components/footer.php");
-?>
+<?php require_once("components/footer.php"); ?>
