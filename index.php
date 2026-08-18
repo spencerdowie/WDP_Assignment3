@@ -6,7 +6,7 @@ require_once("components/header.php");
 
 // Fetch categories and all games directly
 $categories = get_all_categories();
-$games = get_all_games(); // or get_filtered_games(0, "") depending on your db functions
+$games = get_all_games(); 
 
 $myCollectionCount = 0;
 $myReviewCount = 0;
