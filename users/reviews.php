@@ -13,43 +13,14 @@ if ($userId <= 0)
     die("Invalid user.");
 }
 
-// Get user
-$sql = "SELECT id, username
-        FROM users
-        WHERE id = ?";
-
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $userId);
-$stmt->execute();
-
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
+$user = get_user($userId);
 
 if (!$user)
 {
     die("User not found.");
 }
 
-// Get user's reviews
-$sql = "SELECT
-            reviews.id,
-            reviews.game_id,
-            reviews.rating,
-            reviews.title,
-            reviews.body,
-            reviews.created_at,
-            games.name AS game_name
-        FROM reviews
-        INNER JOIN games
-            ON reviews.game_id = games.id
-        WHERE reviews.user_id = ?
-        ORDER BY reviews.created_at DESC";
-
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $userId);
-$stmt->execute();
-
-$reviews = $stmt->get_result();
+$reviews = get_reviews_by_user($userId);
 ?>
 
 <h1>
@@ -58,12 +29,12 @@ $reviews = $stmt->get_result();
 
 <p>
     Total Reviews:
-    <?php echo $reviews->num_rows; ?>
+    <?php echo count($reviews) ?>
 </p>
 
 <hr>
 
-<?php if ($reviews->num_rows === 0): ?>
+<?php if (empty($reviews)): ?>
 
     <div class="alert alert-info">
         This user has not written any reviews yet.
@@ -71,29 +42,21 @@ $reviews = $stmt->get_result();
 
 <?php else: ?>
 
-    <?php while ($review = $reviews->fetch_assoc()): ?>
-
+    <?php foreach ($reviews as $review): ?>
         <div class="card mb-3">
-
             <div class="card-body">
-
                 <h2 class="card-title">
                     <?php echo htmlspecialchars($review["title"]); ?>
                 </h2>
-
                 <h5>
                     <?php echo htmlspecialchars($review["game_name"]); ?>
                 </h5>
 
                 <div class="mb-2">
-
-                    <?php
-                    for ($i = 1; $i <= 5; $i++)
+                    <?php for ($i = 1; $i <= 5; $i++)
                     {
                         echo $i <= $review["rating"] ? "★" : "☆";
-                    }
-                    ?>
-
+                    } ?>
                 </div>
 
                 <p>
@@ -104,10 +67,8 @@ $reviews = $stmt->get_result();
                     <?php echo htmlspecialchars($review["created_at"]); ?>
                 </p>
 
-                <a
-                    href="../reviews/details.php?id=<?php echo $review["id"]; ?>"
-                    class="btn btn-outline-primary"
-                >
+                <a href="../reviews/details.php?id=<?php echo $review["id"]; ?>"
+                    class="btn btn-outline-primary">
                     View Review
                 </a>
 
@@ -115,12 +76,10 @@ $reviews = $stmt->get_result();
 
         </div>
 
-    <?php endwhile; ?>
+    <?php endforeach; ?>
 
 <?php endif; ?>
 
 <?php
-$conn->close();
-
 require_once("../components/footer.php");
 ?>
