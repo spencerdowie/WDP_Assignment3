@@ -1,27 +1,17 @@
 <?php
-//needs to separate from header include 
-//so we can set the page title _after_ getting the game name
-require_once("./db.php");
+require_once("db.php");
+// Inline Admin Check
+if (!isset($_SESSION["id"]) || (int)$_SESSION["role_id"] !== 1) {
+    header("Location: index.php");
+    exit;
+}
 
-if (isset($_POST["delete"]))
-{
-    $gameID = $_POST["id"];
-
-    if (isset($gameID))
-    {
-        if (delete_game_entry($gameID))
-        {
-            header("Location: index.php");
-        }
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["delete"])) {
+    $gameID = (int) ($_POST["id"] ?? 0);
+    if ($gameID > 0) {
+        delete_game_entry($gameID);
     }
 }
-$pageTitle = "Error";
-require_once("components/header.php");
-?>
-<div class="flex-grow-1 d-flex flex-column mt-5 pt-5">
-    <h1 class="text-center">Error deleting game</h1>
-</div>
-
-<?php
-require_once("./components/footer.php");
+header("Location: index.php");
+exit;
 ?>
