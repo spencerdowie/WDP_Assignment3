@@ -1,8 +1,9 @@
 <?php
-require_once("db.php");
+require_once("components/db.php");
 
 //  Auth check
-if (!isset($_SESSION["id"]) || (int)$_SESSION["role_id"] !== 1) {
+if (!isset($_SESSION["id"]) || (int)$_SESSION["role_id"] !== 1)
+{
     header("Location: index.php");
     exit;
 }
@@ -14,88 +15,109 @@ $errors = [];
 $categories = get_all_categories();
 
 //  Form submission logic
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+if (isset($_POST["submit"]))
+{
 
     $name = "";
-    if (isset($_POST["name"])) {
-        $rawName = $_POST["name"];
-        $name = trim($rawName);
+    if (isset($_POST["name"]))
+    {
+        $name = trim($_POST["name"]);
     }
 
     $desc = "";
-    if (isset($_POST["desc"])) {
+    if (isset($_POST["desc"]))
+    {
         $rawDesc = $_POST["desc"];
         $desc = trim($rawDesc);
     }
 
     $date = "";
-    if (isset($_POST["date"])) {
+    if (isset($_POST["date"]))
+    {
         $date = $_POST["date"];
     }
 
     $categoryId = 0;
-    if (isset($_POST["category_id"])) {
+    if (isset($_POST["category_id"]))
+    {
         $categoryId = (int)$_POST["category_id"];
     }
 
     $minPlayers = 1;
-    if (isset($_POST["min_players"])) {
+    if (isset($_POST["min_players"]))
+    {
         $minPlayers = (int)$_POST["min_players"];
     }
 
     $maxPlayers = 1;
-    if (isset($_POST["max_players"])) {
+    if (isset($_POST["max_players"]))
+    {
         $maxPlayers = (int)$_POST["max_players"];
     }
 
     $minPlayTime = 0;
-    if (isset($_POST["min_play_time"])) {
+    if (isset($_POST["min_play_time"]))
+    {
         $minPlayTime = (int)$_POST["min_play_time"];
     }
 
     $maxPlayTime = 0;
-    if (isset($_POST["max_play_time"])) {
+    if (isset($_POST["max_play_time"]))
+    {
         $maxPlayTime = (int)$_POST["max_play_time"];
     }
 
     $imageName = "";
 
     // Validation checks
-    if ($name === "") {
+    if ($name === "")
+    {
         $errors[] = "Name is required.";
     }
-    if ($desc === "") {
+    if ($desc === "")
+    {
         $errors[] = "Description is required.";
     }
-    if ($date === "") {
+    if ($date === "")
+    {
         $errors[] = "Date published is required.";
     }
-    if ($categoryId <= 0) {
+    if ($categoryId <= 0)
+    {
         $errors[] = "Please choose a category.";
     }
-    if ($minPlayers <= 0 || $maxPlayers < $minPlayers) {
+    if ($minPlayers <= 0 || $maxPlayers < $minPlayers)
+    {
         $errors[] = "Player counts are invalid.";
     }
 
     // Image Upload
-    if (isset($_FILES["image"]) && $_FILES["image"]["name"] !== "") {
+    if (isset($_FILES["image"]) && $_FILES["image"]["name"] !== "")
+    {
         $allowed = ["jpg", "jpeg", "png", "gif"];
         $ext = strtolower(pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION));
 
-        if (!in_array($ext, $allowed)) {
+        if (!in_array($ext, $allowed))
+        {
             $errors[] = "Image must be a JPG, PNG, or GIF file.";
-        } else {
+        }
+        else
+        {
             $imageName = uniqid("game_") . "." . $ext;
             move_uploaded_file($_FILES["image"]["tmp_name"], __DIR__ . "/public/images/games/" . $imageName);
         }
     }
 
     // Save Game Entry
-    if (count($errors) === 0) {
-        if (create_game_entry($name, $desc, $date, $categoryId, $minPlayers, $maxPlayers, $minPlayTime, $maxPlayTime, $imageName)) {
+    if (count($errors) === 0)
+    {
+        if (create_game_entry($name, $desc, $date, $categoryId, $minPlayers, $maxPlayers, $minPlayTime, $maxPlayTime, $imageName))
+        {
             header("Location: index.php");
             exit;
-        } else {
+        }
+        else
+        {
             $errors[] = "Failed to add game. Please try again.";
         }
     }
@@ -116,7 +138,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <div class="card p-3 mb-4" style="max-width: 500px;">
     <form method="post" action="#" enctype="multipart/form-data">
-
+        <input name="submit" value="submit" hidden />
         <div class="mb-2">
             <label class="form-label">Title</label>
             <input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($_POST["name"] ?? ""); ?>" required>

@@ -1,19 +1,30 @@
 <?php
-require_once("db.php");
+require_once("./components/db.php");
 
-$gameID = isset($_GET["id"]) ? (int) $_GET["id"] : 0;
-$game = $gameID > 0 ? get_game($gameID) : null;
+$game = null;
+if (isset($_GET["id"]))
+{
+    $game = get_game($_GET["id"]);
+}
 
-if (!$game) {
+if (!$game)
+{
     header("Location: index.php");
     exit;
 }
 
 $reviews = get_reviews($game["id"]);
-$pageTitle = $game["name"] . " - GA(IN)-ME";
-require_once("components/header.php");
+$inCollection =  false;
+$hasReviewed =  false;
 
-$inCollection = ($isLoggedIn && !$isAdmin) ? is_in_collection($_SESSION["id"], $game["id"]) : false;
+if ($isLoggedIn && !$isAdmin)
+{
+    $inCollection = is_in_collection($_SESSION["id"], $game["id"]);
+    $hasReviewed = has_reviewed($_SESSION["id"], $game["id"]);
+}
+
+$pageTitle = $game["name"];
+require_once("components/header.php");
 ?>
 
 <div class="row g-4 my-3">
@@ -44,8 +55,8 @@ $inCollection = ($isLoggedIn && !$isAdmin) ? is_in_collection($_SESSION["id"], $
         <span class="badge bg-secondary mb-3"><?= htmlspecialchars($game["category_name"]); ?></span>
 
         <p class="small text-muted mb-3">
-            <strong>Players:</strong> <?= $game["min_players"]; ?>–<?= $game["max_players"]; ?> &bull; 
-            <strong>Play Time:</strong> <?= $game["min_play_time"]; ?>–<?= $game["max_play_time"]; ?> mins &bull; 
+            <strong>Players:</strong> <?= $game["min_players"]; ?>–<?= $game["max_players"]; ?> &bull;
+            <strong>Play Time:</strong> <?= $game["min_play_time"]; ?>–<?= $game["max_play_time"]; ?> mins &bull;
             <strong>Published:</strong> <?= htmlspecialchars($game["date_published"]); ?>
         </p>
 
@@ -65,7 +76,9 @@ $inCollection = ($isLoggedIn && !$isAdmin) ? is_in_collection($_SESSION["id"], $
                         <button type="submit" class="btn btn-success btn-sm">+ Add to Collection</button>
                     </form>
                 <?php endif; ?>
-                <a href="review/create.php?game_id=<?= $game["id"]; ?>" class="btn btn-primary btn-sm ms-2">Write Review</a>
+                <?php if (!$hasReviewed): ?>
+                    <a href="reviews/create.php?game_id=<?= $game["id"]; ?>" class="btn btn-primary btn-sm ms-2">Write Review</a>
+                <?php endif; ?>
             <?php elseif (!$isLoggedIn): ?>
                 <a href="login.php" class="btn btn-warning btn-sm">Log in to save or review this game</a>
             <?php endif; ?>
@@ -89,14 +102,14 @@ $inCollection = ($isLoggedIn && !$isAdmin) ? is_in_collection($_SESSION["id"], $
                             <span class="text-warning small"><?= str_repeat("★", $review["rating"]) . str_repeat("☆", 5 - $review["rating"]); ?></span>
                         </div>
                         <p class="text-muted extra-small mb-2" style="font-size: 0.85rem;">
-                            By <?= htmlspecialchars($review["first_name"] ?: $review["username"]); ?> on <?= date("M j, Y", strtotime($review["created_at"])); ?>
+                            By <a href="/users/reviews.php?id=<?php echo $review['user_id'] ?>"><?= htmlspecialchars($review["first_name"] ?: $review["username"]); ?></a> on <?= date("M j, Y", strtotime($review["created_at"])); ?>
                         </p>
                         <p class="card-text mb-2"><?= nl2br(htmlspecialchars($review["body"])); ?></p>
 
                         <?php if ($isLoggedIn && ($_SESSION["id"] == $review["user_id"] || $isAdmin)): ?>
-                            <div class="d-flex gap-2">
-                                <a href="review/edit.php?id=<?= $review["id"]; ?>" class="btn btn-link btn-sm text-secondary p-0">Edit</a>
-                                <form action="review/delete.php" method="post" onsubmit="return confirm('Delete this review?');">
+                            <div class="d-flex gap-2 flex-row align-items-center">
+                                <a href="reviews/edit.php?id=<?= $review["id"]; ?>" class="btn btn-link btn-sm text-secondary p-0">Edit</a>
+                                <form action="reviews/delete.php" method="post" onsubmit="return confirm('Delete this review?');">
                                     <input type="hidden" name="id" value="<?= $review["id"]; ?>">
                                     <input type="hidden" name="game_id" value="<?= $game["id"]; ?>">
                                     <button type="submit" class="btn btn-link btn-sm text-danger p-0">Delete</button>

@@ -1,7 +1,6 @@
 <?php
+$pageTitle = "Register";
 require_once('components/header.php');
-$pageTitle = "Register - GA(IN)-ME";
-require_once('db.php');
 
 if (isset($_SESSION['id'])) {
     header("Location: index.php");

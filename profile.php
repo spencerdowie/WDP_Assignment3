@@ -1,5 +1,5 @@
 <?php
-require_once("db.php");
+require_once("components/db.php");
 if (!isset($_SESSION["id"])) {
     header("Location: login.php");
     exit;

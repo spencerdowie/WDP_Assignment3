@@ -1,5 +1,5 @@
 <?php
-require_once("../db.php");
+require_once("../components/db.php");
 
 //admin check
 if (!isset($_SESSION["id"]) || (int)$_SESSION["role_id"] !== 1) {

@@ -1,5 +1,4 @@
 <?php
-require_once("db.php");
 $pageTitle = "About";
 require_once("components/header.php");
 ?>

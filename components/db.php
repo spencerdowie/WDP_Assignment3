@@ -28,6 +28,11 @@ if (!isset($_SESSION["id"]) && isset($_COOKIE["remember_me"]))
     $conn->close();
 }
 
+
+// 
+$isLoggedIn = !empty($_SESSION['id']);
+$isAdmin = $isLoggedIn && isset($_SESSION['role_id']) && (int)$_SESSION['role_id'] === 1;
+
 function create_connection()
 {
     $hostname = "localhost";
@@ -158,6 +163,18 @@ function get_reviews_by_user(int $userId)
     return $res;
 }
 
+function has_reviewed(int $userId, int $gameId)
+{
+    $conn = create_connection();
+    $sql = "SELECT COUNT(id) as reviewed FROM reviews WHERE user_id = ? AND game_id = ? LIMIT 1";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ii", $userId, $gameId);
+    $stmt->execute();
+    $hasReviewed = $stmt->get_result()->fetch_assoc()["reviewed"] > 0;
+    $conn->close();
+    return $hasReviewed;
+}
+
 function delete_review(int $reviewId, int $userId, bool $isAdmin)
 {
     $conn = create_connection();
@@ -172,6 +189,22 @@ function delete_review(int $reviewId, int $userId, bool $isAdmin)
         $stmt->bind_param("ii", $reviewId, $userId);
     }
     $success = $stmt->execute();
+    $conn->close();
+    return $success;
+}
+
+function create_review(int $userId, int $gameId, int $rating, string $title, string $body, int $recommend, int $playCount)
+{
+    $success = false;
+    $conn = create_connection();
+    $stmt = $conn->prepare("INSERT INTO reviews (user_id, game_id, rating, title, body, recommend, play_count) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("iiissii", $userId, $gameId, $rating, $title, $body, $recommend, $playCount);
+
+    if ($stmt->execute())
+    {
+        $success = true;
+    }
+
     $conn->close();
     return $success;
 }
@@ -228,4 +261,64 @@ function get_stats()
     ];
     $conn->close();
     return $stats;
+}
+
+function try_login(string $email, string $password)
+{
+    $isValid = false;
+    $conn = create_connection();
+    $query = "SELECT id, email, password, username, role_id, first_name FROM users WHERE email = ?";
+    if ($stmt = $conn->prepare($query))
+    {
+
+        $stmt->bind_param("s", $email);
+
+        if ($stmt->execute() == false)
+        {
+            echo "Execute failed: " . $stmt->error;
+        }
+        else
+        {
+
+            $result = $stmt->get_result();
+            $rows = $result->fetch_all(MYSQLI_ASSOC);
+
+            if (!empty($rows))
+            {
+                $user = $rows[0];
+
+                if (password_verify($password, $user['password']) == true)
+                {
+                    $isValid = true;
+                    // Password is valid - set session variables
+                    $_SESSION['email'] = $user['email'];
+                    $_SESSION['id'] = $user['id'];
+                    $_SESSION['username'] = $user['username'];
+                    $_SESSION['role_id'] = $user['role_id'];
+                    $_SESSION['first_name'] = $user['first_name'];
+
+                    // Handle Remember Me cookie
+                    if (isset($_POST['remember_me']))
+                    {
+                        $token = bin2hex(random_bytes(32));
+                        $updateQuery = "UPDATE users SET remember_token = ? WHERE id = ?";
+                        if ($updateStmt = $conn->prepare($updateQuery))
+                        {
+                            $updateStmt->bind_param("si", $token, $user['id']);
+                            $updateStmt->execute();
+                            $updateStmt->close();
+                        }
+                        setcookie("remember_me", $token, time() + (86400 * 30), "/", "", false, true);
+                    }
+
+                    header("Location: index.php");
+                    exit;
+                }
+            }
+        }
+        $stmt->close();
+    }
+    $conn->close();
+
+    return $isValid;
 }

@@ -2,9 +2,6 @@
 $pageTitle = "User Reviews";
 
 require_once("../components/header.php");
-require_once("../db.php");
-
-$conn = create_connection();
 
 $userId = isset($_GET["id"]) ? (int)$_GET["id"] : 0;
 
@@ -21,10 +18,18 @@ if (!$user)
 }
 
 $reviews = get_reviews_by_user($userId);
+
+$noReviewMsg = "This user has not written any reviews yet.";
+$title = htmlspecialchars($user["first_name"] ?? $user["username"]) . "'s Reviews";
+if ($isLoggedIn && $_SESSION["id"] == $userId)
+{
+    $noReviewMsg = "You have not written any reviews yet.";
+    $title = "My Reviews";
+}
 ?>
 
-<h1>
-    <?php echo htmlspecialchars($user["username"]); ?>'s Reviews
+<h1 class="display-6 fw-bold mb-3">
+    <?php echo $title ?>
 </h1>
 
 <p>
@@ -37,7 +42,7 @@ $reviews = get_reviews_by_user($userId);
 <?php if (empty($reviews)): ?>
 
     <div class="alert alert-info">
-        This user has not written any reviews yet.
+        <?php echo $noReviewMsg ?>
     </div>
 
 <?php else: ?>

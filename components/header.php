@@ -1,11 +1,14 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
+if (session_status() === PHP_SESSION_NONE)
+{
     session_start();
 }
+require_once("db.php");
 
-$isLoggedIn = !empty($_SESSION['id']);
-$isAdmin = $isLoggedIn && isset($_SESSION['role_id']) && (int)$_SESSION['role_id'] === 1;
-$pageTitle = "GA(IN)-ME";
+if (!isset($pageTitle) || !$pageTitle || $pageTitle == "")
+    $pageTitle = "GA(IN)-ME";
+else
+    $pageTitle .= " - GA(IN)-ME";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,8 +20,8 @@ $pageTitle = "GA(IN)-ME";
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-        crossorigin="anonymous"></script>
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
+    </script>
 </head>
 
 
@@ -37,25 +40,21 @@ $pageTitle = "GA(IN)-ME";
             <div class="collapse navbar-collapse" id="navbarText">
                 <!-- Left-aligned links -->
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/index.php">Home</a>
-                    </li>
-                  
+                    <?php if ($isAdmin): ?>
+                        <!-- Admin Links -->
+                        <li class="nav-item"><a class="nav-link text-warning" href="/admin/dashboard.php">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/admin/categories.php">Categories</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/admin/users.php">Users</a></li>
 
+                    <?php elseif ($isLoggedIn): ?>
+                        <!-- User Links -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="/collection/index.php"> Collection</a>
+                        </li>
+                        <li class="nav-item"><a class="nav-link"
+                                href="/users/reviews.php?id=<?php echo $_SESSION['id'] ?>">My Reviews</a>
+                        </li>
 
-                    <?php if ($isLoggedIn): ?>
-                        <?php if ($isAdmin): ?>
-                            <!-- Admin Links -->
-                            <li class="nav-item"><a class="nav-link text-warning" href="/admin/dashboard.php">Dashboard</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/admin/categories.php">Categories</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/admin/users.php">Users</a></li>
-                        
-                        <?php else: ?>
-                            <!-- User Links -->
-                            <li class="nav-item"><a class="nav-link" href="/collection/index.php"> Collection</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/users/reviews.php">Reviews</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/profile.php"> Profile</a></li>
-                        <?php endif; ?>
                     <?php endif; ?>
                     <li class="nav-item">
                         <a class="nav-link" href="/about.php">About</a>
@@ -64,7 +63,7 @@ $pageTitle = "GA(IN)-ME";
 
                 <!-- Right-aligned buttons -->
                 <ul class="navbar-nav ms-auto align-items-center">
-                    <?php if (empty($_SESSION['id'])): ?>
+                    <?php if (!$isLoggedIn): ?>
                         <li class="nav-item">
                             <a class="nav-link" href="/login.php">Login</a>
                         </li>
@@ -72,6 +71,9 @@ $pageTitle = "GA(IN)-ME";
                             <a class="btn btn-warning btn-sm text-dark fw-semibold" href="/register.php">Register</a>
                         </li>
                     <?php else : ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/profile.php"> Profile</a>
+                        </li>
                         <li class="nav-item mt-2 mt-lg-0">
                             <a class="btn btn-outline-danger btn-sm py-1 px-3" href="/logout.php">Logout</a>
                         </li>

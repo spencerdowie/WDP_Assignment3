@@ -1,5 +1,5 @@
 <?php
-require_once("../db.php");
+require_once("../components/db.php");
 
 if (!isset($_SESSION["id"])) {
     header("Location: ../login.php");
@@ -12,7 +12,7 @@ require_once("../components/header.php");
 $collection = get_user_collection($_SESSION["id"]);
 ?>
 
-<h2>My Collection</h2>
+<h1 class="display-6 fw-bold mb-3">My Collection</h1>
 
 <?php if (empty($collection)): ?>
     <p class="text-muted">No games saved yet. <a href="../index.php">Browse board games</a> to build your collection!</p>

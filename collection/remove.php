@@ -1,5 +1,5 @@
 <?php
-require_once("../db.php");
+require_once("./components/db.php");
 
 //  Auth check
 if (!isset($_SESSION["id"])) {

@@ -1,25 +1,23 @@
 <?php
-require_once("db.php");
-
-$pageTitle = "GA(IN)-ME";
 require_once("components/header.php");
 
 // Fetch categories and all games directly
 $categories = get_all_categories();
-$games = get_all_games(); 
+$games = get_all_games();
 
 $myCollectionCount = 0;
 $myReviewCount = 0;
 
-if ($isLoggedIn && !$isAdmin) {
+if ($isLoggedIn && !$isAdmin)
+{
     $myCollectionCount = count(get_user_collection($_SESSION["id"]));
     $myReviewCount = count(get_reviews_by_user($_SESSION["id"]));
 }
 ?>
 
 <!-- Hero Banner -->
-<div class="p-5 mb-4 text-white rounded shadow-sm" 
-     style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('./public/images/hero.png') no-repeat center center; background-size: cover; min-height: 300px;">
+<div class="p-5 mb-4 text-white rounded shadow-sm"
+    style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('./public/images/hero.png') no-repeat center center; background-size: cover; min-height: 300px;">
     <h1 class="display-5 fw-bold">Discover. Collect. Play.</h1>
     <p class="col-md-8 fs-5">Your personal board game library. Browse the shelf, save games to your collection, and share reviews with the community.</p>
 </div>
@@ -29,7 +27,7 @@ if ($isLoggedIn && !$isAdmin) {
     <div class="card p-3 mb-4">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                <h5 class="mb-0">Welcome back, <?php echo htmlspecialchars($_SESSION["first_name"] ? $_SESSION["first_name"] : $_SESSION["username"]); ?>!</h5>
+                <h5 class="mb-0">Welcome back, <?php echo htmlspecialchars($_SESSION["first_name"] ?? $_SESSION["username"]); ?>!</h5>
                 <small class="text-muted">Account overview</small>
             </div>
             <div class="d-flex gap-3 text-center">
