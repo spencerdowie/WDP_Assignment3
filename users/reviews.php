@@ -5,15 +5,13 @@ require_once("../components/header.php");
 
 $userId = isset($_GET["id"]) ? (int)$_GET["id"] : 0;
 
-if ($userId <= 0)
-{
+if ($userId <= 0) {
     die("Invalid user.");
 }
 
 $user = get_user($userId);
 
-if (!$user)
-{
+if (!$user) {
     die("User not found.");
 }
 
@@ -21,8 +19,7 @@ $reviews = get_reviews_by_user($userId);
 
 $noReviewMsg = "This user has not written any reviews yet.";
 $title = htmlspecialchars($user["first_name"] ?? $user["username"]) . "'s Reviews";
-if ($isLoggedIn && $_SESSION["id"] == $userId)
-{
+if (isset($_SESSION["id"]) && $_SESSION["id"] == $userId) {
     $noReviewMsg = "You have not written any reviews yet.";
     $title = "My Reviews";
 }
@@ -50,9 +47,11 @@ if ($isLoggedIn && $_SESSION["id"] == $userId)
     <?php foreach ($reviews as $review): ?>
         <div class="card mb-3">
             <div class="card-body">
+
                 <h2 class="card-title">
                     <?php echo htmlspecialchars($review["title"]); ?>
                 </h2>
+
                 <h5>
                     <a href="../reviews/details.php?id=<?php echo $review["id"]; ?>"
                         class="text-reset">
@@ -61,18 +60,34 @@ if ($isLoggedIn && $_SESSION["id"] == $userId)
                 </h5>
 
                 <div class="mb-2">
-                    <?php for ($i = 1; $i <= 5; $i++)
-                    {
-                        echo $i <= $review["rating"] ? "★" : "☆";
-                    } ?>
+                    <?php for ($i = 1; $i <= 5; $i++) { echo $i <= $review["rating"] ? "★" : "☆";} ?>
                 </div>
 
                 <p>
                     <?php echo nl2br(htmlspecialchars($review["body"])); ?>
                 </p>
 
+                <p class="text-muted mb-2">
+                    Played:
+                    <?php echo (int)$review["play_count"]; ?>
+                    <?php echo ((int)$review["play_count"] == 1) ? "time" : "times"; ?>
+                    &nbsp; | &nbsp;
+                    <?php if ($review["recommend"]): ?>
+                        👍 Recommended
+                    <?php else: ?>
+                        👎 Not Recommended
+                    <?php endif; ?>
+                </p>
+
                 <p class="text-muted">
+                    Posted:
                     <?php echo htmlspecialchars($review["created_at"]); ?>
+
+                    <?php if ($review["updated_at"] !== $review["created_at"]): ?>
+                        <br>
+                        Updated:
+                        <?php echo htmlspecialchars($review["updated_at"]); ?>
+                    <?php endif; ?>
                 </p>
             </div>
         </div>

@@ -2,24 +2,21 @@
 require_once("../components/db.php");
 
 //  Auth check
-if (!isset($_SESSION["id"]))
-{
+if (!isset($_SESSION["id"])) {
     header("Location: ../login.php");
     exit;
 }
 
 // game id 
 $gameId = 0;
-if (isset($_GET["game_id"]))
-{
+if (isset($_GET["game_id"])) {
     $gameId = (int)$_GET["game_id"];
 }
 
 // Fetch game info
 $game = get_game($gameId);
 
-if (!$game)
-{
+if (!$game) {
     header("Location: ../index.php");
     exit;
 }
@@ -27,58 +24,46 @@ if (!$game)
 // Handle form submission
 $errorMessage = "";
 
-if ($_SERVER["REQUEST_METHOD"] === "POST")
-{
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $rating = 0;
-    if (isset($_POST["rating"]))
-    {
+    if (isset($_POST["rating"])) {
         $rating = (int)$_POST["rating"];
 
         $errorMessage = "Please select a rating between 1 and 5.";
     }
 
     $title = "";
-    if (isset($_POST["title"]))
-    {
+    if (isset($_POST["title"])) {
         $rawTitle = $_POST["title"];
         $title = trim($rawTitle);
     }
 
     $body = "";
-    if (isset($_POST["body"]))
-    {
+    if (isset($_POST["body"])) {
         $rawBody = $_POST["body"];
         $body = trim($rawBody);
     }
 
     $recommend = 1;
-    if (isset($_POST["recommend"]))
-    {
+    if (isset($_POST["recommend"])) {
         $recommend = (int)$_POST["recommend"];
     }
 
     $playCount = 1;
-    if (isset($_POST["play_count"]))
-    {
+    if (isset($_POST["play_count"])) {
         $playCount = (int)$_POST["play_count"];
     }
 
     // Validate inputs
-    if ($rating < 1 || $rating > 5 || $title === "" || $body === "")
-    {
+    if ($rating < 1 || $rating > 5 || $title === "" || $body === "") {
         $errorMessage = "Please complete all required fields.";
-    }
-    else
-    {
+    } else {
         $userId = (int)$_SESSION["id"];
-        if (create_review($userId, $gameId, $rating, $title, $body, $recommend, $playCount))
-        {
+        if (create_review($userId, $gameId, $rating, $title, $body, $recommend, $playCount)) {
             header("Location: /game.php?id=" . $gameId);
             exit;
-        }
-        else
-        {
+        } else {
             $errorMessage = "Could not save review. Please try again.";
         }
     }

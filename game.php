@@ -2,13 +2,11 @@
 require_once("./components/db.php");
 
 $game = null;
-if (isset($_GET["id"]))
-{
+if (isset($_GET["id"])) {
     $game = get_game($_GET["id"]);
 }
 
-if (!$game)
-{
+if (!$game) {
     header("Location: index.php");
     exit;
 }
@@ -17,8 +15,7 @@ $reviews = get_reviews($game["id"]);
 $inCollection =  false;
 $hasReviewed =  false;
 
-if ($isLoggedIn && !$isAdmin)
-{
+if ($isLoggedIn && !$isAdmin) {
     $inCollection = is_in_collection($_SESSION["id"], $game["id"]);
     $hasReviewed = has_reviewed($_SESSION["id"], $game["id"]);
 }
@@ -103,17 +100,45 @@ require_once("components/header.php");
                         </div>
                         <p class="text-muted extra-small mb-2" style="font-size: 0.85rem;">
                             By <a href="/users/reviews.php?id=<?php echo $review['user_id'] ?>"><?= htmlspecialchars($review["first_name"] ?: $review["username"]); ?></a> on <?= date("M j, Y", strtotime($review["created_at"])); ?>
+                            <?php if ($review["updated_at"] !== $review["created_at"]): ?>
+                                <span class="ms-1">· Updated <?= date("M j, Y", strtotime($review["updated_at"])); ?></span>
+                            <?php endif; ?>
                         </p>
+
                         <p class="card-text mb-2"><?= nl2br(htmlspecialchars($review["body"])); ?></p>
 
+                        <div class="small text-muted">
+                            <span class="me-3">Played <?= (int)$review["play_count"]; ?> times</span>
+                            <span><?= $review["recommend"] ? "👍 Recommended" : "👎 Not recommended"; ?></span>
+                        </div>
                         <?php if ($isLoggedIn && ($_SESSION["id"] == $review["user_id"] || $isAdmin)): ?>
                             <div class="d-flex gap-2 flex-row align-items-center">
                                 <a href="reviews/edit.php?id=<?= $review["id"]; ?>" class="btn btn-link btn-sm text-secondary p-0">Edit</a>
-                                <form action="reviews/delete.php" method="post" onsubmit="return confirm('Delete this review?');">
-                                    <input type="hidden" name="id" value="<?= $review["id"]; ?>">
-                                    <input type="hidden" name="game_id" value="<?= $game["id"]; ?>">
-                                    <button type="submit" class="btn btn-link btn-sm text-danger p-0">Delete</button>
-                                </form>
+                                <button type="button" class="btn btn-link btn-sm text-danger p-0" data-bs-toggle="modal" data-bs-target="#deleteReviewModal<?= $review["id"]; ?>">Delete</button>
+
+                                <div class="modal fade" id="deleteReviewModal<?= $review["id"]; ?>" tabindex="-1" aria-labelledby="deleteReviewLabel<?= $review["id"]; ?>" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content border-0 shadow">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title fw-bold" id="deleteReviewLabel<?= $review["id"]; ?>">Delete Review</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body text-center py-4">
+                                                <h5 class="fw-bold">Delete this review?</h5>
+                                                <p class="text-muted mb-0">Are you sure you want to delete <strong><?= htmlspecialchars($review["title"]); ?></strong>?</p>
+                                                <p class="text-muted small mt-2 mb-0">This action cannot be undone.</p>
+                                            </div>
+                                            <div class="modal-footer justify-content-center">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <form action="reviews/delete.php" method="post">
+                                                    <input type="hidden" name="id" value="<?= $review["id"]; ?>">
+                                                    <input type="hidden" name="game_id" value="<?= $game["id"]; ?>">
+                                                    <button type="submit" class="btn btn-danger">Delete Review</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         <?php endif; ?>
                     </div>

@@ -27,7 +27,7 @@ if (isset($_SESSION["role_id"]) && (int)$_SESSION["role_id"] === 1) {
 // if valid delete
 if ($_SERVER["REQUEST_METHOD"] === "POST" && $reviewId > 0) {
     delete_review($reviewId, $_SESSION["id"], $isAdmin);
-    
+
     if ($gameId > 0) {
         header("Location: ../game.php?id=" . $gameId);
         exit;
@@ -36,4 +36,3 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $reviewId > 0) {
 
 header("Location: ../index.php");
 exit;
-?>
