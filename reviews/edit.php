@@ -29,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt = $conn->prepare("UPDATE reviews SET rating=?, title=?, body=?, recommend=?, play_count=? WHERE id=?");
     $stmt->bind_param("issiii", $_POST["rating"], $_POST["title"], $_POST["body"], $_POST["recommend"], $_POST["play_count"], $reviewId);
     $stmt->execute();
-    
+
     header("Location: ../game.php?id=" . $review["game_id"]);
     exit;
 }
