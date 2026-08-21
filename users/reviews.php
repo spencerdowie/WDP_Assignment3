@@ -53,7 +53,7 @@ if (isset($_SESSION["id"]) && $_SESSION["id"] == $userId) {
                 </h2>
 
                 <h5>
-                    <a href="../reviews/details.php?id=<?php echo $review["id"]; ?>"
+                    <a href="../game.php?id=<?php echo $review["game_id"]; ?>"
                         class="text-reset">
                         <?php echo htmlspecialchars($review["game_name"]); ?>
                     </a>
