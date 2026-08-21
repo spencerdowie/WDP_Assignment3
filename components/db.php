@@ -115,6 +115,18 @@ function delete_game_entry(int $gameID)
     $stmt = $conn->prepare("DELETE FROM `games` WHERE `id` = ?");
     $stmt->bind_param("i", $gameID);
     $success = $stmt->execute();
+    if ($success)
+    {        
+        $sql = "DELETE FROM reviews WHERE game_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $gameID);
+        $stmt->execute();
+
+        $sql = "DELETE FROM collections WHERE game_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $gameID);
+        $stmt->execute();
+    }
     $conn->close();
     return $success;
 }
@@ -158,9 +170,9 @@ function get_reviews_by_user(int $userId)
     $stmt = $conn->prepare("SELECT reviews.*, games.name AS game_name FROM reviews JOIN games ON reviews.game_id = games.id WHERE reviews.user_id = ? ORDER BY reviews.created_at DESC");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
-    $res = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $reviews = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $conn->close();
-    return $res;
+    return $reviews;
 }
 
 function has_reviewed(int $userId, int $gameId)
@@ -321,4 +333,54 @@ function try_login(string $email, string $password)
     $conn->close();
 
     return $isValid;
+}
+
+function delete_user(int $userId)
+{
+    $conn = create_connection();
+    $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
+    $stmt->bind_param("i", $userId);
+    $success = $stmt->execute();
+
+    //Clean up user data
+    if ($success)
+    {
+        $sql = "DELETE FROM reviews WHERE user_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+
+        $sql = "DELETE FROM collections WHERE user_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+    }
+    $stmt->close();
+    return $success;
+}
+
+function update_user(int $id, string $firstName, string $lastName, string $email, int $roleId)
+{
+    $conn = create_connection();
+    $stmt = $conn->prepare("UPDATE users SET first_name = ?, last_name = ?, email = ?, role_id = ? WHERE id = ?");
+    $stmt->bind_param("sssii", $firstName, $lastName, $email, $roleId, $id);
+    $stmt->execute();
+    $stmt->close();
+}
+
+function get_users()
+{
+    $conn = create_connection();
+    return $conn->query("
+    SELECT users.*, roles.role_name 
+    FROM users 
+    JOIN roles ON users.role_id = roles.id 
+    ORDER BY users.created_at DESC
+    ")->fetch_all(MYSQLI_ASSOC);
+}
+
+function get_roles()
+{
+    $conn = create_connection();
+    return $conn->query("SELECT * FROM roles ORDER BY id ASC")->fetch_all(MYSQLI_ASSOC);
 }

@@ -49,7 +49,7 @@ else
                     <?php elseif ($isLoggedIn): ?>
                         <!-- User Links -->
                         <li class="nav-item">
-                            <a class="nav-link" href="/collection/index.php"> Collection</a>
+                            <a class="nav-link" href="/collection/index.php">My Collection</a>
                         </li>
                         <li class="nav-item"><a class="nav-link"
                                 href="/users/reviews.php?id=<?php echo $_SESSION['id'] ?>">My Reviews</a>

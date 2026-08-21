@@ -2,7 +2,8 @@
 require_once("../components/db.php");
 
 //admin check
-if (!isset($_SESSION["id"]) || (int)$_SESSION["role_id"] !== 1) {
+if (!isset($_SESSION["id"]) || (int)$_SESSION["role_id"] !== 1)
+{
     header("Location: ../index.php");
     exit;
 }
@@ -12,33 +13,36 @@ require_once("../components/header.php");
 $conn = create_connection();
 
 // Delete User
-if (isset($_POST["delete_id"])) {
+if (isset($_POST["delete_id"]))
+{
     $id = (int)$_POST["delete_id"];
-    if ($id !== (int)$_SESSION["id"]) {
-        $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $stmt->close();
+    if ($id !== (int)$_SESSION["id"])
+    {
+        delete_user($id);
+        header("Location: users.php");
+        exit;
     }
-    header("Location: users.php");
-    exit;
 }
 
 //  Update User
-if (isset($_POST["update_user"])) {
+if (isset($_POST["update_user"]))
+{
     $id = (int)($_POST["user_id"] ?? 0);
     $firstName = trim($_POST["first_name"] ?? "");
     $lastName = trim($_POST["last_name"] ?? "");
     $email = trim($_POST["email"] ?? "");
     $roleId = (int)($_POST["role_id"] ?? 2);
 
-    if ($id > 0 && $firstName !== "" && $email !== "") {
-        $stmt = $conn->prepare("UPDATE users SET first_name = ?, last_name = ?, email = ?, role_id = ? WHERE id = ?");
-        $stmt->bind_param("sssii", $firstName, $lastName, $email, $roleId, $id);
-        $stmt->execute();
-        $stmt->close();
-        header("Location: users.php");
-        exit;
+    if ($id > 0 && $firstName !== "" && $email !== "")
+    {
+        if (update_user($id, $firstName, $lastName, $email, $roleId))
+        {
+            header("Location: users.php");
+            exit;
+        }
+        else
+        {
+        }
     }
 }
 
@@ -46,16 +50,8 @@ if (isset($_POST["update_user"])) {
 $editId = isset($_GET["edit"]) ? (int)$_GET["edit"] : 0;
 
 //  Fetch Users and Roles
-$users = $conn->query("
-    SELECT users.*, roles.role_name 
-    FROM users 
-    JOIN roles ON users.role_id = roles.id 
-    ORDER BY users.created_at DESC
-")->fetch_all(MYSQLI_ASSOC);
-
-$roles = $conn->query("SELECT * FROM roles ORDER BY id ASC")->fetch_all(MYSQLI_ASSOC);
-
-$conn->close();
+$users = get_users();
+$roles = get_roles();
 ?>
 
 <h2>Users</h2>
@@ -85,7 +81,7 @@ $conn->close();
                 <td><?php echo date("M j, Y", strtotime($u["created_at"])); ?></td>
                 <td>
                     <a href="users.php?edit=<?php echo $u["id"]; ?>" class="btn btn-warning btn-sm">Edit</a>
-                    
+
                     <?php if ($u["id"] != $_SESSION["id"]): ?>
                         <form method="post" action="#" onsubmit="return confirm('Delete this user?');" class="d-inline">
                             <input type="hidden" name="delete_id" value="<?php echo $u["id"]; ?>">
@@ -101,7 +97,7 @@ $conn->close();
                     <td colspan="6">
                         <form method="post" action="#" class="row g-2 align-items-center">
                             <input type="hidden" name="user_id" value="<?php echo $u["id"]; ?>">
-                            
+
                             <div class="col-md-3">
                                 <input type="text" name="first_name" class="form-control form-control-sm" value="<?php echo htmlspecialchars($u["first_name"]); ?>" placeholder="First Name" required>
                             </div>

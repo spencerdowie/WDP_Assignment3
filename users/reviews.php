@@ -54,7 +54,10 @@ if ($isLoggedIn && $_SESSION["id"] == $userId)
                     <?php echo htmlspecialchars($review["title"]); ?>
                 </h2>
                 <h5>
-                    <?php echo htmlspecialchars($review["game_name"]); ?>
+                    <a href="../reviews/details.php?id=<?php echo $review["id"]; ?>"
+                        class="text-reset">
+                        <?php echo htmlspecialchars($review["game_name"]); ?>
+                    </a>
                 </h5>
 
                 <div class="mb-2">
@@ -71,14 +74,7 @@ if ($isLoggedIn && $_SESSION["id"] == $userId)
                 <p class="text-muted">
                     <?php echo htmlspecialchars($review["created_at"]); ?>
                 </p>
-
-                <a href="../reviews/details.php?id=<?php echo $review["id"]; ?>"
-                    class="btn btn-outline-primary">
-                    View Review
-                </a>
-
             </div>
-
         </div>
 
     <?php endforeach; ?>

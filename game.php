@@ -43,9 +43,9 @@ require_once("components/header.php");
             <h1 class="h2 mb-0 fw-bold"><?= htmlspecialchars($game["name"]); ?></h1>
             <?php if ($isAdmin): ?>
                 <div class="d-flex gap-2">
-                    <a href="edit-game.php?id=<?= $gameID; ?>" class="btn btn-sm btn-outline-primary">Edit</a>
+                    <a href="edit-game.php?id=<?= $game["id"]; ?>" class="btn btn-sm btn-outline-primary">Edit</a>
                     <form action="delete-game.php" method="post" onsubmit="return confirm('Delete this game permanently?');">
-                        <input type="hidden" name="id" value="<?= $gameID; ?>">
+                        <input type="hidden" name="id" value="<?= $game["id"]; ?>">
                         <button type="submit" name="delete" class="btn btn-sm btn-outline-danger">Delete</button>
                     </form>
                 </div>
